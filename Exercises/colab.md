@@ -7,5 +7,6 @@
 - [1d_intro_to_python_lists_exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/1d_intro_to_python_lists_exercise.ipynb)
 - [1e_Data_Science_Problem_Definition_Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/1e_Data_Science_Problem_Definition_Exercise.ipynb)
 - [2a-Conditionals.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2a-Conditionals.Exercise.ipynb)
-- [2b-Conditionals,Dictionaries,Loops.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2b-Conditionals,Dictionaries,Loops.Exercise.ipynb)
+- [2b_Conditionals_dictionaries_loops_exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2b_Conditionals_dictionaries_loops_exercise.ipynb)
 - [2c-Lists,Dictionaries,Sets,Tuples.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2c-Lists,Dictionaries,Sets,Tuples.Exercise.ipynb)
+- [3a-Functions.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/3a-Functions.Exercise.ipynb)
