@@ -10,3 +10,4 @@
 - [2b_Conditionals_dictionaries_loops_exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2b_Conditionals_dictionaries_loops_exercise.ipynb)
 - [2c-Lists,Dictionaries,Sets,Tuples.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/2c-Lists,Dictionaries,Sets,Tuples.Exercise.ipynb)
 - [3a-Functions.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/3a-Functions.Exercise.ipynb)
+- [3b-EDA.Exercise.ipynb](https://colab.research.google.com/github/cyeef/Data-Science-Portfolio-C21-/blob/main/Exercises/3b-EDA.Exercise.ipynb)
