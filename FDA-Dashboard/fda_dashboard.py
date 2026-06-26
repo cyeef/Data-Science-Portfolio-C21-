@@ -90,11 +90,11 @@ def load_drug_data(limit=1000):
     df['patientsex'] = pd.to_numeric(df['patientsex'], errors='coerce')
     return df
 
-df_fda = load_drug_data(limit=100)
+df_fda = load_drug_data(limit=1000)  
 
 st.subheader("Drug Adverse Event Data (Raw Sample)")
 st.write(f"Shape: {df_fda.shape[0]} rows, {df_fda.shape[1]} columns")
-st.dataframe(df_fda.head(10))
+st.dataframe(df_fda.head(20))
 
 st.write("Missing values per column:")
 st.write(df_fda.isnull().sum())
@@ -299,7 +299,7 @@ report_dict = classification_report(y_test, y_pred_new, zero_division=0, output_
 report_df = pd.DataFrame(report_dict).transpose().round(3)
 st.dataframe(report_df)
 
-supp_url = "https://api.fda.gov/food/event.json?limit=100"
+supp_url = "https://api.fda.gov/food/event.json?limit=1000"
 supp_response = requests.get(supp_url)
 supp_data = supp_response.json()
 
@@ -357,7 +357,7 @@ def build_supplement_dataset(limit=500):
     df = df.dropna()
     return df
 
-df_supp = build_supplement_dataset(limit=500)
+df_supp = build_supplement_dataset(limit=1000)
 
 st.write(f"Supplement dataset shape: {df_supp.shape}")
 st.write("Serious event rate:")
