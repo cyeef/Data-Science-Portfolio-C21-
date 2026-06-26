@@ -68,7 +68,7 @@ for record in data['results']:
   print(f"serious raw: {record['serious']} → mapped: {mapped}")
 
 @st.cache_data(ttl=600)  # cache for 10 minutes
-def load_drug_data(limit=100):
+def load_drug_data(limit=1000):
     url = f"https://api.fda.gov/drug/event.json?limit={limit}"
     response = requests.get(url)
     data = response.json()
