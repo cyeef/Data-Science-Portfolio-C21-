@@ -68,7 +68,7 @@ for record in data['results']:
   print(f"serious raw: {record['serious']} → mapped: {mapped}")
 
 @st.cache_data(ttl=600)  # cache for 10 minutes
-def load_drug_data(limit=1000):
+def load_drug_data(limit=500):
     url = f"https://api.fda.gov/drug/event.json?limit={limit}"
     response = requests.get(url)
     data = response.json()
@@ -90,7 +90,7 @@ def load_drug_data(limit=1000):
     df['patientsex'] = pd.to_numeric(df['patientsex'], errors='coerce')
     return df
 
-df_fda = load_drug_data(limit=1000)  
+df_fda = load_drug_data(limit=500)  
 
 st.subheader("Drug Adverse Event Data (Raw Sample)")
 st.write(f"Shape: {df_fda.shape[0]} rows, {df_fda.shape[1]} columns")
