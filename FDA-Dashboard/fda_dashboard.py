@@ -118,8 +118,9 @@ Averaging across multiple folds (cv=3) gave a stable **67.97% ± 1.85%** — a f
 trustworthy estimate of real performance.
 """)
 
-X = df_fda.drop(columns=['serious']).copy()
-y = df_fda['serious'].copy()
+df_fda_model = df_fda.dropna()
+X = df_fda_model.drop(columns=['serious']).copy()
+y = df_fda_model['serious'].copy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
