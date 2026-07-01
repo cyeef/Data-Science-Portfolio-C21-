@@ -507,6 +507,12 @@ CONDITION_MAP = {
         "drug_epc": ["Nonsteroidal Anti-inflammatory Drug [EPC]", "Antirheumatic Agent [EPC]"],
         "supp_keywords": ["glucosamine", "chondroitin", "turmeric", "curcumin", "msm"],
     },
+    "Blood pressure / hypertension": {
+        "drug_epc": ["Angiotensin 2 Receptor Blocker [EPC]",
+                     "beta-Adrenergic Blocker [EPC]",
+                     "Angiotensin Converting Enzyme Inhibitor [EPC]"],
+        "supp_keywords": ["hibiscus", "beetroot", "coq10", "garlic", "potassium"],
+    },
 }
 
 condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
