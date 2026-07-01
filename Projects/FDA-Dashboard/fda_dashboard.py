@@ -576,8 +576,8 @@ if st.button("Compare this class"):
         "and the supplement keyword list are shown so the matching stays transparent. "
         "Rates are suppressed when fewer than 10 events match."
     )
-condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
-cfg = CONDITION_MAP[condition]
+#condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
+#cfg = CONDITION_MAP[condition]
 
 def drug_serious_rate(epc_list, limit=200):
     clauses = "+".join(f'patient.drug.openfda.pharm_class_epc:"{c.replace(" ", "+")}"'
