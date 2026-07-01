@@ -454,14 +454,7 @@ st.warning(
 # =====================================================================
 # MATCHED THERAPEUTIC CLASS: Drugs vs. Supplements  (new)
 # =====================================================================
-st.subheader("Drug vs. Supplement: Side-by-Side")
-st.warning(
-    "The supplement model may show higher raw accuracy, but this can be misleading "
-    "due to severe class imbalance (most supplement events are flagged serious). "
-    "As with the Transaction project, high accuracy on imbalanced data can simply mean "
-    "the model defaults to predicting the majority class — check precision and recall "
-    "before trusting the accuracy number alone."
-)
+
 
 comparison_df = pd.DataFrame({
     'Metric': ['CV Accuracy', 'Serious Event Rate'],
