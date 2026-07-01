@@ -513,6 +513,10 @@ CONDITION_MAP = {
                      "Angiotensin Converting Enzyme Inhibitor [EPC]"],
         "supp_keywords": ["hibiscus", "beetroot", "coq10", "garlic", "potassium"],
     },
+    "HIV / immune deficiency": {
+        "drug_epc": ["Human Immunodeficiency Virus Nucleoside Analog Reverse Transcriptase Inhibitor [EPC]"],
+        "supp_keywords": ["zinc", "selenium", "vitamin c", "echinacea", "elderberry"],
+    },
 }
 
 condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
