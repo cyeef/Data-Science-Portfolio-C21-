@@ -454,6 +454,37 @@ st.warning(
 # =====================================================================
 # MATCHED THERAPEUTIC CLASS: Drugs vs. Supplements  (new)
 # =====================================================================
+st.subheader("Drug vs. Supplement: Side-by-Side")
+st.warning(
+    "The supplement model may show higher raw accuracy, but this can be misleading "
+    "due to severe class imbalance (most supplement events are flagged serious). "
+    "As with the Transaction project, high accuracy on imbalanced data can simply mean "
+    "the model defaults to predicting the majority class — check precision and recall "
+    "before trusting the accuracy number alone."
+)
+
+comparison_df = pd.DataFrame({
+    'Metric': ['CV Accuracy', 'Serious Event Rate'],
+    'Drug Model': [scores_new.mean(), y_new.mean()],
+    'Supplement Model': [scores_supp.mean(), y_supp.mean()]
+})
+st.dataframe(comparison_df.round(3))
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+axes[0].bar(['Drugs', 'Supplements'], [y_new.mean(), y_supp.mean()], color=['steelblue', 'darkorange'])
+axes[0].set_title('Serious Event Rate')
+axes[0].set_ylabel('Proportion Serious')
+axes[0].set_ylim(0, 1)
+axes[1].bar(['Drugs', 'Supplements'], [scores_new.mean(), scores_supp.mean()], color=['steelblue', 'darkorange'])
+axes[1].set_title('Model CV Accuracy')
+axes[1].set_ylabel('Accuracy')
+axes[1].set_ylim(0, 1)
+plt.tight_layout()
+st.pyplot(fig)
+
+# =====================================================================
+# MATCHED THERAPEUTIC CLASS: Drugs vs. Supplements
+# =====================================================================
 st.subheader("Matched Therapeutic Class: Drugs vs. Supplements")
 st.write(
     "Rather than comparing all drugs to all supplements, this matches a single "
@@ -462,26 +493,89 @@ st.write(
     "Holding the condition constant makes the comparison closer to like-for-like."
 )
 
-# condition -> drug pharmacologic classes (EPC) + supplement name keywords
+# condition -> real FDA EPC strings (from the count endpoint) + supplement keywords
 CONDITION_MAP = {
     "Diabetes / blood sugar": {
-        "drug_epc": ["Biguanide", "Sulfonylurea", "Insulin"],
+        "drug_epc": ["Sulfonylurea [EPC]", "Insulin Analog [EPC]",
+                     "GLP-1 Receptor Agonist [EPC]",
+                     "Sodium-Glucose Cotransporter 2 Inhibitor [EPC]"],
         "supp_keywords": ["berberine", "cinnamon", "chromium", "bitter melon", "alpha lipoic"],
     },
     "Cholesterol / heart": {
-        "drug_epc": ["HMG-CoA Reductase Inhibitor"],
+        "drug_epc": ["HMG-CoA Reductase Inhibitor [EPC]", "PCSK9 Inhibitor [EPC]",
+                     "Dietary Cholesterol Absorption Inhibitor [EPC]"],
         "supp_keywords": ["red yeast rice", "niacin", "plant sterol", "fish oil", "omega", "garlic"],
     },
     "Depression / mood": {
-        "drug_epc": ["Selective Serotonin Reuptake Inhibitor"],
+        "drug_epc": ["Serotonin Reuptake Inhibitor [EPC]", "Mood Stabilizer [EPC]"],
         "supp_keywords": ["st john", "st. john", "sam-e", "saffron", "5-htp"],
     },
     "Joint / arthritis": {
-        "drug_epc": ["Nonsteroidal Anti-inflammatory Drug"],
+        "drug_epc": ["Nonsteroidal Anti-inflammatory Drug [EPC]", "Antirheumatic Agent [EPC]"],
         "supp_keywords": ["glucosamine", "chondroitin", "turmeric", "curcumin", "msm"],
     },
 }
 
+condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
+cfg = CONDITION_MAP[condition]
+
+def drug_serious_rate(epc_list, limit=200):
+    clauses = "+".join(f'patient.drug.openfda.pharm_class_epc:"{c.replace(" ", "+")}"'
+                       for c in epc_list)
+    url = f"https://api.fda.gov/drug/event.json?search=({clauses})&limit={limit}{KEY_PARAM}"
+    data = fetch_fda_json(url)
+    if data is None:
+        return None, 0
+    flags = [1 if int(r.get("serious", 2)) == 1 else 0 for r in data["results"]]
+    n = len(flags)
+    return (sum(flags) / n if n else None), n
+
+def supp_serious_rate(keywords, limit=500):
+    url = f"https://api.fda.gov/food/event.json?limit={limit}&search=products.industry_code:54{KEY_PARAM}"
+    data = fetch_fda_json(url)
+    if data is None:
+        return None, 0
+    flags = []
+    for r in data["results"]:
+        names = " ".join(p.get("name_brand", "").lower() for p in r.get("products", []))
+        if any(k in names for k in keywords):
+            outcomes = r.get("outcomes", [])
+            flags.append(1 if any(o in serious_outcomes for o in outcomes) else 0)
+    n = len(flags)
+    return (sum(flags) / n if n else None), n
+
+MIN_N = 10  # below this, a rate is noise, not signal
+
+if st.button("Compare this class"):
+    with st.spinner("Pulling matched-class data..."):
+        d_rate, d_n = drug_serious_rate(cfg["drug_epc"])
+        s_rate, s_n = supp_serious_rate(cfg["supp_keywords"])
+
+    col1, col2 = st.columns(2)
+
+    # Drug side
+    if d_rate is not None and d_n >= MIN_N:
+        col1.metric("Drug serious rate", f"{d_rate:.1%}", f"n = {d_n}")
+    elif d_rate is not None:
+        col1.warning(f"Only {d_n} matched drug events — too few to report a reliable rate.")
+    else:
+        col1.warning("No drug data returned for this class.")
+
+    # Supplement side
+    if s_rate is not None and s_n >= MIN_N:
+        col2.metric("Supplement serious rate", f"{s_rate:.1%}", f"n = {s_n}")
+    elif s_rate is not None:
+        col2.warning(f"Only {s_n} matched supplement events — too few to report a reliable rate.")
+    else:
+        col2.warning("No supplements matched these keywords in this pull.")
+
+    st.info(
+        "Read with care: these are reported-event rates, not risk. FAERS (drugs) and "
+        "CAERS (supplements) are different reporting systems with different volumes and "
+        "reporters, so a gap may reflect who reports, not real danger. Sample sizes (n) "
+        "and the supplement keyword list are shown so the matching stays transparent. "
+        "Rates are suppressed when fewer than 10 events match."
+    )
 condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
 cfg = CONDITION_MAP[condition]
 
