@@ -570,27 +570,63 @@ if st.button("Compare this class"):
         "Rates are suppressed when fewer than 10 events match."
     )
 
-comparison_df = pd.DataFrame({
-    'Metric': ['CV Accuracy', 'Serious Event Rate'],
-    'Drug Model': [scores_new.mean(), y_new.mean()],
-    'Supplement Model': [scores_supp.mean(), y_supp.mean()]
-})
-st.dataframe(comparison_df.round(3))
+# =====================================================================
+# SUMMARY: All matched classes at a glance
+# =====================================================================
+st.subheader("All Matched Classes at a Glance")
+st.write(
+    "Serious-event rates across every condition, drugs vs. supplements. "
+    "Each bar is labeled with its sample size (n). Bars from fewer than "
+    f"{MIN_N} events are shown faded — their rates are unreliable and should not be compared."
+)
 
-fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+if st.button("Build summary across all conditions"):
+    rows = []
+    with st.spinner("Pulling all conditions..."):
+        for cond_name, cond_cfg in CONDITION_MAP.items():
+            d_rate, d_n = drug_serious_rate(cond_cfg["drug_epc"])
+            s_rate, s_n = supp_serious_rate(cond_cfg["supp_keywords"])
+            rows.append({
+                "Condition": cond_name,
+                "Drug rate": d_rate, "Drug n": d_n,
+                "Supplement rate": s_rate, "Supplement n": s_n,
+            })
+    summary = pd.DataFrame(rows)
 
-axes[0].bar(['Drugs', 'Supplements'], [y_new.mean(), y_supp.mean()], color=['steelblue', 'darkorange'])
-axes[0].set_title('Serious Event Rate')
-axes[0].set_ylabel('Proportion Serious')
-axes[0].set_ylim(0, 1)
+    # Show the numbers as a table first (honest, exact, includes n)
+    st.dataframe(summary.round(3))
 
-axes[1].bar(['Drugs', 'Supplements'], [scores_new.mean(), scores_supp.mean()], color=['steelblue', 'darkorange'])
-axes[1].set_title('Model CV Accuracy')
-axes[1].set_ylabel('Accuracy')
-axes[1].set_ylim(0, 1)
+    # Grouped bar chart with n labels and faded low-n bars
+    fig, ax = plt.subplots(figsize=(11, 6))
+    x = np.arange(len(summary))
+    width = 0.38
 
-plt.tight_layout()
-st.pyplot(fig)
+    for i, row in summary.iterrows():
+        # drug bar
+        d_alpha = 1.0 if row["Drug n"] >= MIN_N else 0.35
+        s_alpha = 1.0 if row["Supplement n"] >= MIN_N else 0.35
+        d_val = row["Drug rate"] if row["Drug rate"] is not None else 0
+        s_val = row["Supplement rate"] if row["Supplement rate"] is not None else 0
+
+        ax.bar(x[i] - width/2, d_val, width, color="steelblue", alpha=d_alpha)
+        ax.bar(x[i] + width/2, s_val, width, color="darkorange", alpha=s_alpha)
+        ax.text(x[i] - width/2, d_val + 0.02, f"n={row['Drug n']}", ha="center", fontsize=8)
+        ax.text(x[i] + width/2, s_val + 0.02, f"n={row['Supplement n']}", ha="center", fontsize=8)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(summary["Condition"], rotation=20, ha="right")
+    ax.set_ylabel("Serious-event rate")
+    ax.set_ylim(0, 1.1)
+    ax.set_title("Serious-Event Rate by Condition (faded = n < 10, unreliable)")
+    ax.legend(["Drugs", "Supplements"])
+    plt.tight_layout()
+    st.pyplot(fig)
+
+    st.info(
+        "Faded bars come from very small supplement samples and are not "
+        "statistically meaningful. The consistent finding is the reporting-system "
+        "asymmetry (FAERS vs. CAERS), not a reliable drug-vs-supplement risk difference."
+    )
 #Added revised code above to rebuild data frame
 # records_supp = []
 # for record in supp_data['results']:
