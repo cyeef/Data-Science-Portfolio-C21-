@@ -443,6 +443,9 @@ if len(df_supp_minority) > 0 and len(df_supp_majority) > 0:
 else:
     st.write("Not enough minority-class samples in this pull to rebalance. Try refreshing the page to pull a new sample.")
 
+# =====================================================================
+# Drug vs. Supplement: Side-by-Side (overall models)
+# =====================================================================
 st.subheader("Drug vs. Supplement: Side-by-Side")
 st.warning(
     "The supplement model may show higher raw accuracy, but this can be misleading "
@@ -451,10 +454,6 @@ st.warning(
     "the model defaults to predicting the majority class — check precision and recall "
     "before trusting the accuracy number alone."
 )
-# =====================================================================
-# MATCHED THERAPEUTIC CLASS: Drugs vs. Supplements  (new)
-# =====================================================================
-
 
 comparison_df = pd.DataFrame({
     'Metric': ['CV Accuracy', 'Serious Event Rate'],
@@ -603,7 +602,7 @@ if st.button("Build summary across all conditions"):
             })
     summary = pd.DataFrame(rows)
 
-    # Show the numbers as a table first (honest, exact, includes n)
+    # Exact numbers first (honest, includes n)
     st.dataframe(summary.round(3))
 
     # Grouped bar chart with n labels and faded low-n bars
@@ -612,7 +611,6 @@ if st.button("Build summary across all conditions"):
     width = 0.38
 
     for i, row in summary.iterrows():
-        # drug bar
         d_alpha = 1.0 if row["Drug n"] >= MIN_N else 0.35
         s_alpha = 1.0 if row["Supplement n"] >= MIN_N else 0.35
         d_val = row["Drug rate"] if row["Drug rate"] is not None else 0
@@ -637,32 +635,3 @@ if st.button("Build summary across all conditions"):
         "statistically meaningful. The consistent finding is the reporting-system "
         "asymmetry (FAERS vs. CAERS), not a reliable drug-vs-supplement risk difference."
     )
-#Added revised code above to rebuild data frame
-# records_supp = []
-# for record in supp_data['results']:
-#     consumer = record.get('consumer', {})
-#     outcomes = record.get('outcomes', [])
-#     products = record.get('products', [])
-
-#     # Target — any serious outcome?
-#     is_serious = 1 if any(o in serious_outcomes for o in outcomes) else 0
-
-#     # Gender
-#     gender = consumer.get('gender', None)
-#     gender_code = 1 if gender == 'Male' else (2 if gender == 'Female' else None)
-
-#     # Product type
-#     industry_code = products[0].get('industry_code', None) if products else None
-#     is_supplement = 1 if industry_code == '54' else 0
-
-#     records_supp.append({
-#         'serious':       is_serious,
-#         'gender':        gender_code,
-#         'is_supplement': is_supplement
-#     })
-
-# df_supp = pd.DataFrame(records_supp)
-# print(df_supp.shape)
-# print(df_supp['serious'].value_counts())
-# print(df_supp['is_supplement'].value_counts())
-#print(df_supp.head())
