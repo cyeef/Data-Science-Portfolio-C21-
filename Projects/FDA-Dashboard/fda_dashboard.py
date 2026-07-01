@@ -451,7 +451,86 @@ st.warning(
     "the model defaults to predicting the majority class — check precision and recall "
     "before trusting the accuracy number alone."
 )
+# =====================================================================
+# MATCHED THERAPEUTIC CLASS: Drugs vs. Supplements  (new)
+# =====================================================================
+st.subheader("Matched Therapeutic Class: Drugs vs. Supplements")
+st.write(
+    "Rather than comparing all drugs to all supplements, this matches a single "
+    "condition — the drug class that treats it (via the FDA's Established "
+    "Pharmacologic Class) against supplements marketed for the same condition. "
+    "Holding the condition constant makes the comparison closer to like-for-like."
+)
 
+# condition -> drug pharmacologic classes (EPC) + supplement name keywords
+CONDITION_MAP = {
+    "Diabetes / blood sugar": {
+        "drug_epc": ["Biguanide", "Sulfonylurea", "Insulin"],
+        "supp_keywords": ["berberine", "cinnamon", "chromium", "bitter melon", "alpha lipoic"],
+    },
+    "Cholesterol / heart": {
+        "drug_epc": ["HMG-CoA Reductase Inhibitor"],
+        "supp_keywords": ["red yeast rice", "niacin", "plant sterol", "fish oil", "omega", "garlic"],
+    },
+    "Depression / mood": {
+        "drug_epc": ["Selective Serotonin Reuptake Inhibitor"],
+        "supp_keywords": ["st john", "st. john", "sam-e", "saffron", "5-htp"],
+    },
+    "Joint / arthritis": {
+        "drug_epc": ["Nonsteroidal Anti-inflammatory Drug"],
+        "supp_keywords": ["glucosamine", "chondroitin", "turmeric", "curcumin", "msm"],
+    },
+}
+
+condition = st.selectbox("Choose a condition to compare", list(CONDITION_MAP.keys()))
+cfg = CONDITION_MAP[condition]
+
+def drug_serious_rate(epc_list, limit=200):
+    clauses = "+".join(f'patient.drug.openfda.pharm_class_epc:"{c.replace(" ", "+")}"'
+                       for c in epc_list)
+    url = f"https://api.fda.gov/drug/event.json?search=({clauses})&limit={limit}{KEY_PARAM}"
+    data = fetch_fda_json(url)
+    if data is None:
+        return None, 0
+    flags = [1 if int(r.get("serious", 2)) == 1 else 0 for r in data["results"]]
+    n = len(flags)
+    return (sum(flags) / n if n else None), n
+
+def supp_serious_rate(keywords, limit=500):
+    url = f"https://api.fda.gov/food/event.json?limit={limit}&search=products.industry_code:54{KEY_PARAM}"
+    data = fetch_fda_json(url)
+    if data is None:
+        return None, 0
+    flags = []
+    for r in data["results"]:
+        names = " ".join(p.get("name_brand", "").lower() for p in r.get("products", []))
+        if any(k in names for k in keywords):
+            outcomes = r.get("outcomes", [])
+            flags.append(1 if any(o in serious_outcomes for o in outcomes) else 0)
+    n = len(flags)
+    return (sum(flags) / n if n else None), n
+
+if st.button("Compare this class"):
+    with st.spinner("Pulling matched-class data..."):
+        d_rate, d_n = drug_serious_rate(cfg["drug_epc"])
+        s_rate, s_n = supp_serious_rate(cfg["supp_keywords"])
+
+    col1, col2 = st.columns(2)
+    if d_rate is not None:
+        col1.metric(f"Drug serious rate", f"{d_rate:.1%}", f"n = {d_n}")
+    else:
+        col1.warning("No drug data returned for this class.")
+    if s_rate is not None:
+        col2.metric(f"Supplement serious rate", f"{s_rate:.1%}", f"n = {s_n}")
+    else:
+        col2.warning("No supplements matched these keywords in this pull.")
+
+    st.info(
+        "Read with care: these are reported-event rates, not risk. FAERS (drugs) and "
+        "CAERS (supplements) are different reporting systems with different volumes and "
+        "reporters, so a gap may reflect who reports, not real danger. The sample sizes (n) "
+        "and the supplement keyword list are shown so the matching stays transparent."
+    )
 comparison_df = pd.DataFrame({
     'Metric': ['CV Accuracy', 'Serious Event Rate'],
     'Drug Model': [scores_new.mean(), y_new.mean()],
