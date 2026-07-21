@@ -1,0 +1,10 @@
+streamlit
+numpy
+pandas
+scikit-learn
+textblob
+wordcloud
+matplotlib
+huggingface_hub
+sentence-transformers
+pyarrow
