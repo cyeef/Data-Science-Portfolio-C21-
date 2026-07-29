@@ -32,7 +32,7 @@ if uploaded is not None:
     arr = np.array(arr) / 255.0
 
     # 4. reshape to a batch of one: (1, 100, 100, 1)
-    arr = arr.reshape(1, 100, 100, 1)
+    arr = arr.reshape(1, 100, 100, 1) #
    
   
     prob = float(model.predict(arr).flatten()[0])
