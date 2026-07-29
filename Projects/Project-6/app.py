@@ -26,13 +26,13 @@ if uploaded is not None:
     arr = img.convert('L')
 
     # 2. resize to match training images
-    arr = arr.resize((100, 100))
+    arr = arr.resize((IMG_SIZE, IMG_SIZE))
 
     # 3. scale pixels the same way you scaled X
     arr = np.array(arr) / 255.0
 
     # 4. reshape to a batch of one: (1, 100, 100, 1)
-    arr = arr.reshape(1, 100, 100, 1) #
+    arr = arr.reshape(1, IMG_SIZE, IMG_SIZE, 1) #
    
   
     prob = float(model.predict(arr).flatten()[0])
