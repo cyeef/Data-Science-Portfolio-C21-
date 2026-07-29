@@ -8,10 +8,13 @@ IMG_SIZE = 100
 st.title("Dogs vs. Cats Classifier")
 st.caption("CNN trained on 24,946 grayscale images. Project 6.")
 
+from pathlib import Path
+
+MODEL_PATH = Path(__file__).parent / 'dogs_cats_cnn.keras'
+
 @st.cache_resource
 def get_model():
-    return load_model('dogs_cats_cnn.keras')
-
+    return load_model(MODEL_PATH)
 model = get_model()
 
 uploaded = st.file_uploader("Upload a photo", type=['jpg', 'jpeg', 'png'])
