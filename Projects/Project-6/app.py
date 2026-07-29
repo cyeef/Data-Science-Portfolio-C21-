@@ -22,7 +22,7 @@ if uploaded is not None:
 
     # ---- YOUR FOUR PREPROCESSING STEPS GO HERE ----
    
-    # 1. read the file from disk, already in grayscale
+    
     arr = img.convert('L')
 
     # 2. resize to match training images
@@ -31,7 +31,7 @@ if uploaded is not None:
     # 3. scale pixels the same way you scaled X
     arr = np.array(arr) / 255.0
 
-    # 4. reshape to a batch of one: (1, 100, 100, 1)
+    
     arr = arr.reshape(1, IMG_SIZE, IMG_SIZE, 1) #
    
   
