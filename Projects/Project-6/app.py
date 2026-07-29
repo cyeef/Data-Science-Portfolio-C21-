@@ -21,7 +21,7 @@ if uploaded is not None:
     st.image(img, width=300)
 
     # ---- YOUR FOUR PREPROCESSING STEPS GO HERE ----
-    def prepare_image(filepath):
+   
     # 1. read the file from disk, already in grayscale
     arr = img.convert('L')
 
@@ -33,7 +33,7 @@ if uploaded is not None:
 
     # 4. reshape to a batch of one: (1, 100, 100, 1)
     arr = arr.reshape(1, 100, 100, 1)
-    return image_url
+   
   
     prob = float(model.predict(arr).flatten()[0])
     label = "Cat" if prob > 0.5 else "Dog"
