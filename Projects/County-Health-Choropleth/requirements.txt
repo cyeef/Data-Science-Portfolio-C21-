@@ -1,4 +1,4 @@
-requirements
-plotly, 
-streamlit, 
+huggingface_hub
+plotly 
+streamlit
 pandas
